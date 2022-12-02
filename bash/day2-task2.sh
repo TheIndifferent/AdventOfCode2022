@@ -22,4 +22,6 @@ cat 'day2-input.txt' \
   -e 's/Scissors Rock/7/g' \
   -e 's/Scissors Paper/2/g' \
   -e 's/Scissors Scissors/6/g' \
-  | awk '{s+=$1} END {printf "%.0f\n", s}'
+  | tr '\n' '+' \
+  | sed 's/+$/\n/' \
+  | bc
