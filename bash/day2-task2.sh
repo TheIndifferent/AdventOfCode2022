@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#!/bin/bash
-
 cat 'day2-input.txt' \
   | sed -e 's/A/Rock/g' -e 's/B/Paper/g' -e 's/C/Scissors/g' -e 's/X/Lose/g' -e 's/Y/Draw/g' -e 's/Z/Win/g' \
   | sed \
