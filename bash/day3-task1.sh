@@ -40,9 +40,13 @@ function item_priorities() {
   done
 }
 
+function sum_lines() {
+  tr '\n' '+' \
+  | sed 's/+$/\n/' \
+  | bc
+}
+
 cat 'day3-input.txt' \
   | common_items_per_rucksack \
   | item_priorities \
-  | tr '\n' '+' \
-  | sed 's/+$/\n/' \
-  | bc
+  | sum_lines

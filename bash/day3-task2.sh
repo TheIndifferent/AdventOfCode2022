@@ -5,8 +5,11 @@ function unique_items() {
 }
 
 function common_items_between_rucksacks() {
-  common_items_first_second="$( comm -12 <( echo "$1" | unique_items ) <( echo "$2" | unique_items ) )"
-  comm -12 <( echo "$3" | unique_items ) <( echo "$common_items_first_second" | unique_items )
+  comm -12 \
+  <( echo "$1" | unique_items ) \
+  <( comm -12 \
+      <( echo "$2" | unique_items ) \
+      <( echo "$3" | unique_items ))
 }
 
 export -f common_items_between_rucksacks
@@ -27,9 +30,13 @@ function item_priorities() {
   done
 }
 
-cat 'day3-input.txt' \
-  | xargs -L3 bash -c 'common_items_between_rucksacks $0 $1 $2' \
-  | item_priorities \
-  | tr '\n' '+' \
+function sum_lines() {
+  tr '\n' '+' \
   | sed 's/+$/\n/' \
   | bc
+}
+
+cat 'day3-input-sample.txt' \
+  | xargs -L3 bash -c 'common_items_between_rucksacks $0 $1 $2' \
+  | item_priorities \
+  | sum_lines
