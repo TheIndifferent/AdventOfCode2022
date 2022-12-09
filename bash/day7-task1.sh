@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-#set -x
+set -x
 
-readonly INPUT_FILE='day7-input.txt'
+readonly INPUT_FILE='day7-input-sample.txt'
 
 function sum_file_size_per_dir() {
   size=0
@@ -28,72 +28,44 @@ function sum_file_size_per_dir() {
   done
 }
 
-function flatten_dir_tree() {
-  path=''
-  while read -r first command dirname
-  do
-    if [[ $first == '$' ]]
-    then
-      if [[ $dirname == '..' ]]
-      then
-        path="${path%_*}"
-      else
-        path="${path}_${dirname}"
-      fi
-    else
-      echo "${path} ${first}"
-    fi
-  done
-}
-
-#function filter_out_subtrees_with_large_files() {
-#  buffer="$( cat - )"
-#  while read -r dir size
-#  do
-#    if [[ $size -ge 100000 ]]
-#    then
-#      dir_to_remove="$dir"
-#      while [[ -n "$dir_to_remove" ]]
-#      do
-#        buffer="$( echo "$buffer" | grep -v "$dir_to_remove " )"
-#        dir_to_remove="${dir_to_remove%/*}"
-#      done
-#    fi
-#  done < <( echo "$buffer" )
-#  echo "$buffer"
-#}
-
 function create_physical_structure() {
   tmpdir="$( mktemp -d )"
-  while read -r dir size
-  do
-    touch "${tmpdir}/${dir}-${size}"
-  done
-  echo "$tmpdir"
-}
-
-readonly rejected_dir_name='rejected'
-
-function move_rejected_files() {
-  tmpdir="$( cat - )"
   (
     cd "$tmpdir"
-    mkdir "$rejected_dir_name"
-    for file in *
+    size=0
+    while read -r first second third
     do
-      if [[ "${file##*-}" -gt 100000 ]]
+      if [[ $first == '$' ]]
       then
-        mv "${file}" "${rejected_dir_name}/"
+        if [[ $size -ne 0 ]]
+        then
+          touch "$size"
+        fi
+        size=0
+        if [[ "$third" == '..' ]]
+        then
+          cd ..
+        else
+          mkdir "$third"
+          cd "$third"
+        fi
+      else
+        size=$(( $size + $first ))
       fi
     done
   )
-  ls -lR "$tmpdir"
+  echo "$tmpdir"
+}
+
+function next() {
+  tmpdir="$( cat - )"
+  find "$tmpdir" -type f
 }
 
 cat "$INPUT_FILE" | grep -v '$ ls' | grep -v 'dir ' | tail -n +2 \
-  | sum_file_size_per_dir \
-  | flatten_dir_tree \
   | create_physical_structure \
-  | move_rejected_files
-#  | cat -
+  | next
+#  | sum_file_size_per_dir \
+#  | flatten_dir_tree \
+#  | move_rejected_files
 #  | filter_out_subtrees_with_large_files
